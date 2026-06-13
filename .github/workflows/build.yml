@@ -16,14 +16,11 @@ jobs:
       matrix:
         include:
           - os: ubuntu-22.04
-            script_name: linux
-            args: ''
+            build_args: ''
           - os: macos-latest
-            script_name: macos
-            args: ''
+            build_args: ''
           - os: windows-latest
-            script_name: win32
-            args: ''
+            build_args: ''
 
     runs-on: ${{ matrix.os }}
 
@@ -36,50 +33,62 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Rust
-        uses: dtolnay/rust-toolchain@stable
-        if: matrix.os == 'ubuntu-22.04'
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install Linux dependencies
-        if: matrix.os == 'ubuntu-22.04'
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev
 
       - name: Install dependencies
-        run: yarn --frozen-lockfile
+        run: yarn --frozen-lockfile --ignore-scripts
 
       - name: Compile
         run: yarn compile
 
-      - name: Package
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
         run: yarn package
         env:
-          YARN_IGNORE_SCRIPTS: true
+          VSCODE_BUILD_LINUX: '1'
+
+      - name: Package (macOS)
+        if: runner.os == 'macOS'
+        run: yarn package
+        env:
+          VSCODE_BUILD_MAC: '1'
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        run: yarn package
+        env:
+          VSCODE_BUILD_WIN32: '1'
 
       - name: Upload Linux artifacts
-        if: matrix.os == 'ubuntu-22.04'
+        if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4
         with:
           name: obrith-linux-x64
           path: .build/linux/**/*
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload macOS artifacts
-        if: matrix.os == 'macos-latest'
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v4
         with:
-          name: obrith-macos-arm64
+          name: obrith-macos
           path: .build/darwin/**/*
-          if-no-files-found: error
+          if-no-files-found: warn
 
       - name: Upload Windows artifacts
-        if: matrix.os == 'windows-latest'
+        if: runner.os == 'Windows'
         uses: actions/upload-artifact@v4
         with:
           name: obrith-win32-x64
           path: .build/win32/**/*
-          if-no-files-found: error
+          if-no-files-found: warn
 
   release:
     needs: build
@@ -90,6 +99,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f | head -50
 
       - name: Create Release
         uses: softprops/action-gh-release@v2

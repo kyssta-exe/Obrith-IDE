@@ -46,7 +46,7 @@ jobs:
         run: yarn --frozen-lockfile --ignore-scripts --ignore-engines
 
       - name: Compile
-        run: yarn compile
+        run: yarn compile-client
 
       - name: Package (Linux)
         if: runner.os == 'Linux'

@@ -41,6 +41,9 @@ jobs:
         env:
           VSCODE_SKIP_NODE_VERSION_CHECK: '1'
 
+      - name: Install build dependencies
+        run: cd build && npm install --ignore-scripts
+
       - name: Fix build dependencies
         run: |
           node node_modules/@vscode/gulp-merge-json/postinstall.js

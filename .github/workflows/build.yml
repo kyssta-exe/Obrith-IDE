@@ -36,43 +36,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev
 
-      - name: Install dependencies
+      - name: Install dependencies (root only)
         run: npm install --ignore-scripts
         env:
           VSCODE_SKIP_NODE_VERSION_CHECK: '1'
-          VSCODE_FORCE_INSTALL: '1'
-
-      - name: Run postinstall
-        run: node build/npm/postinstall.ts
 
       - name: Compile
-        run: npm run compile-client
+        run: node node_modules/gulp/bin/gulp.js compile-client
 
       - name: Package
-        run: npm run package
+        run: node node_modules/gulp/bin/gulp.js vscode-${{ runner.os == 'Linux' && 'linux-x64' || runner.os == 'macOS' && 'darwin-arm64' || 'win32-x64' }}
+        env:
+          VSCODE_BUILD: '1'
 
-      - name: Upload Linux artifacts
-        if: runner.os == 'Linux'
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: obrith-linux-x64
-          path: .build/linux/**/*
-          if-no-files-found: warn
-
-      - name: Upload macOS artifacts
-        if: runner.os == 'macOS'
-        uses: actions/upload-artifact@v4
-        with:
-          name: obrith-macos
-          path: .build/darwin/**/*
-          if-no-files-found: warn
-
-      - name: Upload Windows artifacts
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: obrith-win32-x64
-          path: .build/win32/**/*
+          name: obrith-${{ runner.os == 'Linux' && 'linux-x64' || runner.os == 'macOS' && 'macos-arm64' || 'win32-x64' }}
+          path: .build/**/*
           if-no-files-found: warn
 
   release:

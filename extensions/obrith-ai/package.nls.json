@@ -1,0 +1,23 @@
+{
+  "obrith.ai.displayName": "Obrith AI",
+  "obrith.ai.description": "Multi-provider AI integration with Zigma Mode",
+  "obrith.chat.name": "AI Chat",
+  "command.obrith.chat.focus": "AI: Focus Chat",
+  "command.obrith.zigma.toggle": "AI: Toggle Zigma Mode",
+  "command.obrith.inline.suggest": "AI: Trigger Inline Suggestion",
+  "command.obrith.settings.open": "AI: Open Provider Settings",
+  "configuration.obrith.ai.title": "Obrith AI",
+  "configuration.obrith.ai.zigmaMode": "Auto-select best model for each task",
+  "configuration.obrith.ai.defaultProvider": "Default AI provider",
+  "configuration.obrith.ai.autocomplete.enabled": "Enable inline autocomplete suggestions",
+  "configuration.obrith.ai.autocomplete.debounceMs": "Debounce delay for autocomplete in milliseconds",
+  "configuration.obrith.ai.providers.openai.apiKey": "OpenAI API key",
+  "configuration.obrith.ai.providers.openai.baseUrl": "OpenAI API base URL",
+  "configuration.obrith.ai.providers.openai.model": "OpenAI model to use",
+  "configuration.obrith.ai.providers.anthropic.apiKey": "Anthropic API key",
+  "configuration.obrith.ai.providers.anthropic.model": "Anthropic model to use",
+  "configuration.obrith.ai.providers.google.apiKey": "Google AI API key",
+  "configuration.obrith.ai.providers.google.model": "Google Gemini model to use",
+  "configuration.obrith.ai.providers.ollama.baseUrl": "Ollama server URL",
+  "configuration.obrith.ai.providers.ollama.model": "Ollama model to use"
+}

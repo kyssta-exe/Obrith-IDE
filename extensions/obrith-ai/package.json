@@ -1,0 +1,139 @@
+{
+  "name": "obrith-ai",
+  "displayName": "Obrith AI",
+  "description": "Multi-provider AI integration with Zigma Mode",
+  "version": "0.0.1",
+  "publisher": "Obrith",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "AI",
+    "Machine Learning"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "obrith-ai",
+          "title": "AI Assistant",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "obrith-ai": [
+        {
+          "id": "obrith.chat",
+          "name": "AI Chat"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "obrith.chat.focus",
+        "title": "AI: Focus Chat"
+      },
+      {
+        "command": "obrith.zigma.toggle",
+        "title": "AI: Toggle Zigma Mode"
+      },
+      {
+        "command": "obrith.inline.suggest",
+        "title": "AI: Trigger Inline Suggestion"
+      },
+      {
+        "command": "obrith.settings.open",
+        "title": "AI: Open Provider Settings"
+      }
+    ],
+    "configuration": {
+      "title": "Obrith AI",
+      "properties": {
+        "obrith.ai.zigmaMode": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-select best model for each task"
+        },
+        "obrith.ai.defaultProvider": {
+          "type": "string",
+          "default": "openai",
+          "enum": [
+            "openai",
+            "anthropic",
+            "google",
+            "ollama"
+          ]
+        },
+        "obrith.ai.autocomplete.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable inline autocomplete suggestions"
+        },
+        "obrith.ai.autocomplete.debounceMs": {
+          "type": "number",
+          "default": 200
+        },
+        "obrith.ai.providers.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "OpenAI API key"
+        },
+        "obrith.ai.providers.openai.baseUrl": {
+          "type": "string",
+          "default": "https://api.openai.com/v1"
+        },
+        "obrith.ai.providers.openai.model": {
+          "type": "string",
+          "default": "gpt-4o"
+        },
+        "obrith.ai.providers.anthropic.apiKey": {
+          "type": "string",
+          "default": ""
+        },
+        "obrith.ai.providers.anthropic.model": {
+          "type": "string",
+          "default": "claude-sonnet-4-20250514"
+        },
+        "obrith.ai.providers.google.apiKey": {
+          "type": "string",
+          "default": ""
+        },
+        "obrith.ai.providers.google.model": {
+          "type": "string",
+          "default": "gemini-2.0-flash"
+        },
+        "obrith.ai.providers.ollama.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434"
+        },
+        "obrith.ai.providers.ollama.model": {
+          "type": "string",
+          "default": "llama3.1"
+        }
+      }
+    },
+    "keybindings": [
+      {
+        "command": "obrith.chat.focus",
+        "key": "ctrl+shift+a"
+      },
+      {
+        "command": "obrith.zigma.toggle",
+        "key": "ctrl+shift+z"
+      }
+    ]
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.3.0"
+  }
+}

@@ -6,21 +6,27 @@ on:
       - 'v*'
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-22.04
-            vscode_arch: x64
-            artifact_name: linux-x64
+            script_name: linux
+            args: ''
           - os: macos-latest
-            vscode_arch: arm64
-            artifact_name: darwin-arm64
+            script_name: macos
+            args: ''
           - os: windows-latest
-            vscode_arch: x64
-            artifact_name: win32-x64
+            script_name: win32
+            args: ''
+
     runs-on: ${{ matrix.os }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,12 +34,19 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: '20'
 
-      - name: Install Yarn
-        run: npm install -g yarn
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        if: matrix.os == 'ubuntu-22.04'
 
-      - name: Install Dependencies
+      - name: Install Linux dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxkbfile-dev pkg-config libsecret-1-dev
+
+      - name: Install dependencies
         run: yarn --frozen-lockfile
 
       - name: Compile
@@ -41,27 +54,48 @@ jobs:
 
       - name: Package
         run: yarn package
+        env:
+          YARN_IGNORE_SCRIPTS: true
 
-      - name: Find Package Output
-        id: find_package
-        shell: bash
-        run: |
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            echo "VSIX=$(ls -1 out/*.vsix 2>/dev/null | head -1)" >> $GITHUB_OUTPUT
-          else
-            echo "VSIX=$(ls -1 out/*.vsix 2>/dev/null | head -1)" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload Release Asset
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ steps.find_package.outputs.VSIX }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload Artifact
+      - name: Upload Linux artifacts
+        if: matrix.os == 'ubuntu-22.04'
         uses: actions/upload-artifact@v4
         with:
-          name: obrith-${{ matrix.artifact_name }}
-          path: ${{ steps.find_package.outputs.VSIX }}
-          if-no-files-found: warn
+          name: obrith-linux-x64
+          path: .build/linux/**/*
+          if-no-files-found: error
+
+      - name: Upload macOS artifacts
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: obrith-macos-arm64
+          path: .build/darwin/**/*
+          if-no-files-found: error
+
+      - name: Upload Windows artifacts
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: obrith-win32-x64
+          path: .build/win32/**/*
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          generate_release_notes: true
+          files: artifacts/**/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
